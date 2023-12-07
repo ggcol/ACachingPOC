@@ -1,4 +1,10 @@
-﻿Console.WriteLine(RepeateableText.Separator);
+﻿using DataAccessAPI;
+using DataAccessAPI.Repositories;
+using Shared.Entities;
+
+IDataGateway<Programmer> programmersGateway = new ProgrammersGateway();
+
+Console.WriteLine(RepeateableText.Separator);
 Console.WriteLine("Welcome to a very useless application!");
 Console.WriteLine(RepeateableText.Separator);
 
@@ -16,6 +22,7 @@ while (repeat)
     switch (menuUserInput)
     {
         case "1":
+            var programmers = await programmersGateway.GetAllAsync();
             break;
         case "9":
             Console.Clear();

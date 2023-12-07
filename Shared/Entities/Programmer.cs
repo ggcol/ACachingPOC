@@ -1,3 +1,9 @@
-﻿namespace Shared.Entities;
+﻿using System.Text.Json.Serialization;
 
-public record Programmer(string Name);
+namespace Shared.Entities;
+
+public class Programmer
+{
+    [JsonPropertyName(nameof(Id))] public int? Id { get; set; }
+    [JsonPropertyName(nameof(Name))] public string? Name { get; set; }
+}
