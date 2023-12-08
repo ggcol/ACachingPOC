@@ -16,7 +16,7 @@ public sealed class ProgrammerController : Controller
     private readonly IControllerMonitor _monitor;
 
     private readonly TimeSpan _defaultCacheEntryValidity =
-        TimeSpan.FromMinutes(10);
+        TimeSpan.FromSeconds(20);
 
     public ProgrammerController(ILogger<ProgrammerController> logger,
         IDataSource dataSource, IMemoryCache cache, IControllerMonitor monitor)
@@ -71,7 +71,7 @@ public sealed class ProgrammerController : Controller
 
         var isCached =
             _cache.TryGetValue(getAllCacheKey, out var cachedProgrammers);
-
+        
         if (isCached)
         {
             return Ok(cachedProgrammers);
@@ -81,7 +81,9 @@ public sealed class ProgrammerController : Controller
             new Programmer()
             {
                 Id = record.Id,
-                Name = record.Name
+                Name = record.Name,
+                LinePerHour = record.LinePerHour,
+                TimesInBurnout = record.TimesInBurnout
             });
 
         _cache.Set(getAllCacheKey, programmers, _defaultCacheEntryValidity);
@@ -110,7 +112,9 @@ public sealed class ProgrammerController : Controller
                 .Select(record => new Programmer()
                 {
                     Id = record.Id,
-                    Name = record.Name
+                    Name = record.Name,
+                    LinePerHour = record.LinePerHour,
+                    TimesInBurnout = record.TimesInBurnout
                 })
                 //this is wanted to break if there is more than 1 result
                 .Single();

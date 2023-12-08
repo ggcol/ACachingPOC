@@ -1,22 +1,23 @@
 using FakeDataSource.Data;
+using Shared;
 using Shared.DataRecords.Programmer;
 
 namespace FakeDataSource.DataSources;
 
-public sealed class FakeSometimesSlowDb : DataPool, IDataSource
+public sealed class FakeSometimesSlowDb : IDataSource
 {
     private readonly Random _random = new();
 
-    public IEnumerable<Record> Programmers
+    public IEnumerable<ProgrammerRecord> Programmers
     {
         get
         {
             if (ImBusy())
             {
-                Thread.Sleep(10000);
+                Thread.Sleep(Thresholds.DataSource.HeavyLatency);
             }
 
-            return _programmers;
+            return DataPool.Programmers;
         }
     }
 

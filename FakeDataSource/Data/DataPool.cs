@@ -2,14 +2,14 @@ using Shared.DataRecords.Programmer;
 
 namespace FakeDataSource.Data;
 
-public abstract class DataPool
+public static class DataPool
 {
-    protected IEnumerable<Record> _programmers => new[]
+    public static IEnumerable<ProgrammerRecord> Programmers => new[]
     {
-        new Record(0, "Enrico"),
-        new Record(2, "Alexander"),
-        new Record(3, "Gianluca"),
-        new Record(4, "Sergio"),
-        new Record(5, "Tommaso")
+        new ProgrammerRecord(0, "Enrico", 100),
+        new ProgrammerRecord(2, "Alexander", 100),
+        new ProgrammerRecord(3, "Gianluca", 100),
+        new ProgrammerRecord(4, "Sergio", 100),
+        new ProgrammerRecord(5, "Tommaso", 100)
     };
 }

@@ -1,16 +1,17 @@
 using FakeDataSource.Data;
+using Shared;
 using Shared.DataRecords.Programmer;
 
 namespace FakeDataSource.DataSources;
 
-public sealed class FakeSlowDb : DataPool, IDataSource
+public sealed class FakeSlowDb : IDataSource
 {
-    public IEnumerable<Record> Programmers
+    public IEnumerable<ProgrammerRecord> Programmers
     {
         get
         {
-            Thread.Sleep(10000);
-            return _programmers;
+            Thread.Sleep(Thresholds.DataSource.HeavyLatency);
+            return DataPool.Programmers;
         }
     }
 }

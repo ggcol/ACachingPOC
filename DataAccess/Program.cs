@@ -10,9 +10,10 @@ builder.Services.AddControllers();
 builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen()
-    .AddSingleton<IDataSource, FakeDb>()
-    .AddSingleton<IMemoryCache, MemoryCache>()
-    .AddScoped<IControllerMonitor, ControllerMonitor>();
+    .AddSingleton<IDataSource, SharedWithOtherSystemsDb>()
+    // .AddSingleton<IMemoryCache, MemoryCache>()
+    .AddScoped<IControllerMonitor, ControllerMonitor>()
+    .AddMemoryCache();
 
 var app = builder.Build();
 
