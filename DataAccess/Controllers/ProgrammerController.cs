@@ -30,8 +30,9 @@ public sealed class ProgrammerController : Controller
     public override void OnActionExecuting(ActionExecutingContext context)
     {
         var callId = context.HttpContext.TraceIdentifier;
-        
-        _logger.LogInformation("{Controller}Controller/{Route} has been called, call id: {CallId}",
+
+        _logger.LogInformation(
+            "{Controller}Controller/{Route} has been called, call id: {CallId}",
             context.ActionDescriptor.RouteValues["controller"],
             context.ActionDescriptor.RouteValues["action"],
             callId);
@@ -45,7 +46,8 @@ public sealed class ProgrammerController : Controller
     {
         var callId = context.HttpContext.TraceIdentifier;
 
-        _logger.LogInformation("{Controller}Controller/{Route} end of call, call id: {CallId}",
+        _logger.LogInformation(
+            "{Controller}Controller/{Route} end of call, call id: {CallId}",
             context.ActionDescriptor.RouteValues["controller"],
             context.ActionDescriptor.RouteValues["action"],
             callId);
@@ -63,13 +65,27 @@ public sealed class ProgrammerController : Controller
 
     [HttpGet]
     [Route(Routes.Programmer.GetAll)]
-    public IEnumerable<Programmer> GetAll()
+    public ActionResult<IEnumerable<Programmer>> GetAll()
     {
-        return _dataSource.Programmers.Select(record => new Programmer()
+        const string getAllCacheKey = "GetAll";
+
+        var isCached =
+            _cache.TryGetValue(getAllCacheKey, out var cachedProgrammers);
+
+        if (isCached)
         {
-            Id = record.Id,
-            Name = record.Name
-        });
+            return Ok(cachedProgrammers);
+        }
+
+        var programmers = _dataSource.Programmers.Select(record =>
+            new Programmer()
+            {
+                Id = record.Id,
+                Name = record.Name
+            });
+
+        _cache.Set(getAllCacheKey, programmers, _defaultCacheEntryValidity);
+        return Ok(programmers);
     }
 
     [HttpGet]
@@ -106,7 +122,7 @@ public sealed class ProgrammerController : Controller
             }
 
             _cache.Set(programmer.Id, programmer, _defaultCacheEntryValidity);
-            
+
             return Ok(programmer);
         }
         catch (Exception ex) when (ex is ArgumentException

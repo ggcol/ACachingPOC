@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen()
-    .AddSingleton<IDataSource, FakeSlowDb>()
+    .AddSingleton<IDataSource, FakeDb>()
     .AddSingleton<IMemoryCache, MemoryCache>()
     .AddScoped<IControllerMonitor, ControllerMonitor>();
 
