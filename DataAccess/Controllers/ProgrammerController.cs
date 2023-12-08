@@ -29,35 +29,40 @@ public sealed class ProgrammerController : Controller
 
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        _logger.LogInformation("{Controller}Controller/{Route} has been called",
+        var callId = context.HttpContext.TraceIdentifier;
+        
+        _logger.LogInformation("{Controller}Controller/{Route} has been called, call id: {CallId}",
             context.ActionDescriptor.RouteValues["controller"],
-            context.ActionDescriptor.RouteValues["action"]);
+            context.ActionDescriptor.RouteValues["action"],
+            callId);
 
-        _monitor.Start(context.HttpContext.TraceIdentifier);
+        _monitor.Start(callId);
 
         base.OnActionExecuting(context);
     }
 
     public override void OnActionExecuted(ActionExecutedContext context)
     {
-        _logger.LogInformation("{Controller}Controller/{Route} end of call",
-            context.ActionDescriptor.RouteValues["controller"],
-            context.ActionDescriptor.RouteValues["action"]);
+        var callId = context.HttpContext.TraceIdentifier;
 
-        var elapsed =
-            _monitor.Stop(context.HttpContext.TraceIdentifier);
+        _logger.LogInformation("{Controller}Controller/{Route} end of call, call id: {CallId}",
+            context.ActionDescriptor.RouteValues["controller"],
+            context.ActionDescriptor.RouteValues["action"],
+            callId);
+
+        var elapsed = _monitor.Stop(callId);
 
         _logger.LogInformation(
             "{Controller}Controller/{Route} took {Elapsed} to execute for call {CallId}",
             context.ActionDescriptor.RouteValues["controller"],
             context.ActionDescriptor.RouteValues["action"], elapsed,
-            context.HttpContext.TraceIdentifier);
+            callId);
 
         base.OnActionExecuted(context);
     }
 
     [HttpGet]
-    [Route(Routes.Programmer.GetAllRoute)]
+    [Route(Routes.Programmer.GetAll)]
     public IEnumerable<Programmer> GetAll()
     {
         return _dataSource.Programmers.Select(record => new Programmer()
@@ -68,7 +73,7 @@ public sealed class ProgrammerController : Controller
     }
 
     [HttpGet]
-    [Route(Routes.Programmer.GetRoute)]
+    [Route(Routes.Programmer.Get)]
     public ActionResult<Programmer?> Get(int id)
     {
         var isCached = _cache.TryGetValue(id, out var cachedProgrammer);
@@ -100,8 +105,9 @@ public sealed class ProgrammerController : Controller
                     "Id missing - DB is corrupted - data integrity breach");
             }
 
-            return Ok(_cache.Set(programmer.Id, programmer,
-                _defaultCacheEntryValidity));
+            _cache.Set(programmer.Id, programmer, _defaultCacheEntryValidity);
+            
+            return Ok(programmer);
         }
         catch (Exception ex) when (ex is ArgumentException
                                        or InvalidOperationException)

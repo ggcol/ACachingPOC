@@ -1,6 +1,6 @@
 using DataAccess.Utils;
 using FakeDataSource;
-using FakeDataSource.DataSources.Fakes;
+using FakeDataSource.DataSources;
 using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
