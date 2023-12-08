@@ -2,7 +2,8 @@
 using DataAccessAPI.Repositories;
 using Shared.Entities;
 
-IDataGateway<Programmer> programmersGateway = new ProgrammersGateway();
+IDataGateway<Programmer> programmersGateway =
+    new ProgrammersGateway(new HttpClient());
 
 Console.WriteLine(RepeateableText.Separator);
 Console.WriteLine("Welcome to a very useless application!");
@@ -16,7 +17,7 @@ while (repeat)
     Console.WriteLine("1. For a REST Api call");
     Console.WriteLine("9. For a console cleanup");
     Console.WriteLine(RepeateableText.Separator);
-    
+
     var menuUserInput = Console.ReadLine();
 
     switch (menuUserInput)
@@ -35,7 +36,7 @@ while (repeat)
     Console.WriteLine("Other useless actions?");
     Console.WriteLine(RepeateableText.YesOrNoOptions);
     Console.WriteLine(RepeateableText.Separator);
-    
+
     var repeatUserInput = Console.ReadLine();
     repeat = EvaluateForRepeat(repeatUserInput);
 }

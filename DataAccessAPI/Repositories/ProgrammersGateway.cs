@@ -7,9 +7,13 @@ public sealed class ProgrammersGateway : IDataGateway<Programmer>
 {
     private const string _baseUrl = "https://localhost:7107/";
     private const string _getAllEnpoint = "GetAll";
+    
+    private readonly HttpClient _client;
 
-    //this should normally be injected
-    private readonly HttpClient _client = new HttpClient();
+    public ProgrammersGateway(HttpClient client)
+    {
+        _client = client;
+    }
 
     public async Task<IReadOnlyList<Programmer>> GetAllAsync(
         CancellationToken cancellationToken = default)
