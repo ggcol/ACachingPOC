@@ -1,33 +1,65 @@
-using System.Runtime.CompilerServices;
+using DataAccess.Utils;
 using FakeDataSource;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
 using Shared;
 using Shared.Entities;
 
 namespace DataAccess.Controllers;
 
-public sealed class ProgrammerController : MyController
+public sealed class ProgrammerController : Controller
 {
+    private readonly ILogger<ProgrammerController> _logger;
     private readonly IDataSource _dataSource;
     private readonly IMemoryCache _cache;
+    private readonly IControllerMonitor _monitor;
 
-    private readonly TimeSpan _defaultCacheEntryValidity = TimeSpan.FromMinutes(10);
-    
-    public ProgrammerController(ILogger<ProgrammerController> logger, 
-        IDataSource dataSource, IMemoryCache cache)
-        : base(logger)
+    private readonly TimeSpan _defaultCacheEntryValidity =
+        TimeSpan.FromMinutes(10);
+
+    public ProgrammerController(ILogger<ProgrammerController> logger,
+        IDataSource dataSource, IMemoryCache cache, IControllerMonitor monitor)
     {
+        _logger = logger;
         _dataSource = dataSource;
         _cache = cache;
+        _monitor = monitor;
+    }
+
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        _logger.LogInformation("{Controller}Controller/{Route} has been called",
+            context.ActionDescriptor.RouteValues["controller"],
+            context.ActionDescriptor.RouteValues["action"]);
+
+        _monitor.Start(context.HttpContext.TraceIdentifier);
+
+        base.OnActionExecuting(context);
+    }
+
+    public override void OnActionExecuted(ActionExecutedContext context)
+    {
+        _logger.LogInformation("{Controller}Controller/{Route} end of call",
+            context.ActionDescriptor.RouteValues["controller"],
+            context.ActionDescriptor.RouteValues["action"]);
+
+        var elapsed =
+            _monitor.Stop(context.HttpContext.TraceIdentifier);
+
+        _logger.LogInformation(
+            "{Controller}Controller/{Route} took {Elapsed} to execute for call {CallId}",
+            context.ActionDescriptor.RouteValues["controller"],
+            context.ActionDescriptor.RouteValues["action"], elapsed,
+            context.HttpContext.TraceIdentifier);
+
+        base.OnActionExecuted(context);
     }
 
     [HttpGet]
     [Route(Routes.Programmer.GetAllRoute)]
     public IEnumerable<Programmer> GetAll()
     {
-        LogCall(Routes.Programmer.GetAllRoute);
-
         return _dataSource.Programmers.Select(record => new Programmer()
         {
             Id = record.Id,
@@ -39,19 +71,19 @@ public sealed class ProgrammerController : MyController
     [Route(Routes.Programmer.GetRoute)]
     public ActionResult<Programmer?> Get(int id)
     {
-        LogCall(Routes.Programmer.GetRoute);
-
         var isCached = _cache.TryGetValue(id, out var cachedProgrammer);
 
         if (isCached)
         {
-            _logger.LogInformation("Got a match from the cache for id: {Id}!", id);
+            _logger.LogInformation("Got a match from the cache for id: {Id}!",
+                id);
             return Ok(cachedProgrammer as Programmer);
         }
 
         try
         {
-            _logger.LogInformation("Retrieving from data source with id: {Id}", id);
+            _logger.LogInformation("Retrieving from data source with id: {Id}",
+                id);
             var programmer = _dataSource.Programmers
                 .Where(record => record.Id == id)
                 .Select(record => new Programmer()
@@ -64,38 +96,17 @@ public sealed class ProgrammerController : MyController
 
             if (programmer.Id is null)
             {
-                return BadRequest("Id missing - DB is corrupted - data integrity breach");
+                return BadRequest(
+                    "Id missing - DB is corrupted - data integrity breach");
             }
-            
-            return Ok(_cache.Set(programmer.Id, programmer, _defaultCacheEntryValidity));
+
+            return Ok(_cache.Set(programmer.Id, programmer,
+                _defaultCacheEntryValidity));
         }
         catch (Exception ex) when (ex is ArgumentException
                                        or InvalidOperationException)
         {
             return BadRequest(ex.Message);
         }
-    }
-}
-
-public abstract class MyController : Controller
-{
-    protected readonly ILogger _logger;
-
-    protected MyController(ILogger logger)
-    {
-        _logger = logger;
-    }
-
-    protected void LogCall(string endpoint,
-        [CallerFilePath] string? callerFilePath = default)
-    {
-        var caller = callerFilePath?
-            .Split("/")
-            .LastOrDefault()?
-            .Split(".")
-            .FirstOrDefault();
-
-        _logger.LogInformation("{Controller}/{Route} has been called",
-            caller, endpoint);
     }
 }
