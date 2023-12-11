@@ -4,7 +4,7 @@ using Shared.DataRecords.Programmer;
 
 namespace FakeDataSource.DataSources;
 
-public class SharedWithOtherSystemsDb : IDataSource
+public sealed class SharedWithOtherSystemsDb : IDataSource
 {
     private readonly TimeSpan _extSysUpdateInterval = TimeSpan.FromSeconds(10);
     private readonly Random _random = new();

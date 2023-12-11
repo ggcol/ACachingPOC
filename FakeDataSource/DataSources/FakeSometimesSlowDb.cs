@@ -12,10 +12,9 @@ public sealed class FakeSometimesSlowDb : IDataSource
     {
         get
         {
-            if (ImBusy())
-            {
-                Thread.Sleep(Thresholds.DataSource.HeavyLatency);
-            }
+            Thread.Sleep(ImBusy()
+                ? Thresholds.DataSource.HeavyLatency
+                : Thresholds.DataSource.NormalLatency);
 
             return DataPool.Programmers;
         }

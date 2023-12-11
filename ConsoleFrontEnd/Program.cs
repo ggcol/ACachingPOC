@@ -16,6 +16,7 @@ while (repeat)
     Console.WriteLine(RepeateableText.Separator);
     Console.WriteLine("1. For a REST Api call");
     Console.WriteLine("9. For a console cleanup");
+    Console.WriteLine("0. To exit the program");
     Console.WriteLine(RepeateableText.Separator);
 
     var menuUserInput = Console.ReadLine();
@@ -28,23 +29,12 @@ while (repeat)
         case "9":
             Console.Clear();
             break;
+        case "0":
+            repeat = false;
+            break;
         default:
             break;
     }
-
-    Console.WriteLine(RepeateableText.Separator);
-    Console.WriteLine("Other useless actions?");
-    Console.WriteLine(RepeateableText.YesOrNoOptions);
-    Console.WriteLine(RepeateableText.Separator);
-
-    var repeatUserInput = Console.ReadLine();
-    repeat = EvaluateForRepeat(repeatUserInput);
-}
-
-static bool EvaluateForRepeat(string? input)
-{
-    return input is not null &&
-           input.Equals("y", StringComparison.OrdinalIgnoreCase);
 }
 
 public class RepeateableText
