@@ -2,6 +2,11 @@ namespace Shared;
 
 public abstract class Routes
 {
+    public abstract class Health
+    {
+        public const string Get = "Get";
+    }
+    
     public abstract class Programmer
     {
         public const string Get = "Get";
