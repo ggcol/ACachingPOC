@@ -14,10 +14,17 @@ public sealed class HealthRepository : Repository<string>, IHealthRepository
     public async Task<bool> PingAsync(
         CancellationToken cancellationToken = default)
     {
-        var response = await _client
-            .GetAsync(MakeUri(Routes.Health.Ping), cancellationToken)
-            .ConfigureAwait(false);
+        try
+        {
+            var response = await _client
+                .GetAsync(MakeUri(Routes.Health.Ping), cancellationToken)
+                .ConfigureAwait(false);
 
-        return response.IsSuccessStatusCode;
+            return response.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException ex)
+        {
+            return false;
+        }
     }
 }
