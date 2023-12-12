@@ -1,23 +1,22 @@
-﻿using DataAccessAPI;
+﻿using ConsoleFrontEnd.Presenters;
+using DataAccessAPI;
 using DataAccessAPI.Repositories;
 using Shared.Entities;
 
 IDataGateway<Programmer> programmersGateway =
     new ProgrammersGateway(new HttpClient());
 
-Console.WriteLine(RepeateableText.Separator);
-Console.WriteLine("Welcome to a very useless application!");
-Console.WriteLine(RepeateableText.Separator);
+PrintHeader();
 
 var repeat = true;
 
 while (repeat)
 {
-    Console.WriteLine(RepeateableText.Separator);
+    Console.WriteLine(RepeatableText.Separator);
     Console.WriteLine("1. For a REST Api call");
     Console.WriteLine("9. For a console cleanup");
     Console.WriteLine("0. To exit the program");
-    Console.WriteLine(RepeateableText.Separator);
+    Console.WriteLine(RepeatableText.Separator);
 
     var menuUserInput = Console.ReadLine();
 
@@ -25,9 +24,15 @@ while (repeat)
     {
         case "1":
             var programmers = await programmersGateway.GetAllAsync();
+            var presenters = programmers.Select(p => new ProgrammerPresenter(p));
+            foreach (var presenter in presenters)
+            {
+                presenter.Display();
+            }
             break;
         case "9":
             Console.Clear();
+            PrintHeader();
             break;
         case "0":
             repeat = false;
@@ -37,8 +42,15 @@ while (repeat)
     }
 }
 
-public class RepeateableText
+Console.WriteLine("Bye bye!");
+
+static void PrintHeader()
+{
+    Console.WriteLine(RepeatableText.Separator);
+    Console.WriteLine("Welcome to a very useless application!");
+}
+
+public static class RepeatableText
 {
     public const string Separator = "==================================";
-    public const string YesOrNoOptions = "y/n";
 }
