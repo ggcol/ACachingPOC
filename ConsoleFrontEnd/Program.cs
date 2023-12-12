@@ -1,10 +1,7 @@
 ﻿using ConsoleFrontEnd.Presenters;
 using DataAccessAPI;
-using DataAccessAPI.Repositories;
-using Shared.Entities;
 
-IDataGateway<Programmer> programmersGateway =
-    new ProgrammersGateway(new HttpClient());
+IDataGateway dataGateway = new DataGateway(new HttpClient());
 
 PrintHeader();
 
@@ -23,7 +20,7 @@ while (repeat)
     switch (menuUserInput)
     {
         case "1":
-            var programmers = await programmersGateway.GetAllAsync();
+            var programmers = await dataGateway.Programmers.GetAllAsync().ConfigureAwait(false);
             var presenters = programmers.Select(p => new ProgrammerPresenter(p));
             foreach (var presenter in presenters)
             {

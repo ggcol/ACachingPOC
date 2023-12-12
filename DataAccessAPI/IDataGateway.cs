@@ -1,7 +1,10 @@
+using DataAccessAPI.Repositories.Health;
+using DataAccessAPI.Repositories.Programmer;
+
 namespace DataAccessAPI;
 
-public interface IDataGateway<T>
+public interface IDataGateway
 {
-    public Task<IReadOnlyList<T>> GetAllAsync(
-        CancellationToken cancellationToken = default);
+    IHealthRepository Health { get; }
+    IProgrammersRepository Programmers { get; }
 }

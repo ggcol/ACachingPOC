@@ -13,10 +13,10 @@ public class HealthController : Controller
     }
     
     [HttpGet]
-    [Route(Routes.Health.Get)]
-    public IActionResult Get()
+    [Route(Routes.Health.Ping)]
+    public IActionResult Ping()
     {
         _logger.LogInformation("Health check called");
-        return Ok("Server is up and running");
+        return Ok();
     }
 }
